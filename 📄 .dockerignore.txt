@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pkl
+*.db
+*.sqlite
+*.ipynb
+.env
+venv/
+chroma_db/
+data/
+.DS_Store
+*.log
+*.tmp

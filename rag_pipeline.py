@@ -1,49 +1,29 @@
-from langchain.document_loaders import PyPDFLoader
+# Updated imports for LangChain 0.2+
+from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.llms import Ollama
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_community.llms import Ollama
 from langchain.chains import RetrievalQA
 import os
 
+# 🔌 LLM and Embedding Models
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-llm = Ollama(model="llama3.2:1b")
+llm = Ollama(base_url="http://host.docker.internal:11434", model="llama3:8b")
+
 
 def load_and_chunk_pdf(pdf_path):
     loader = PyPDFLoader(pdf_path)
     documents = loader.load()
-    
+
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     chunks = text_splitter.split_documents(documents)
-    
+
     return chunks
+
 
 def create_vector_store(chunks, persist_directory="./chroma_db"):
     vector_store = Chroma.from_documents(
         documents=chunks,
         embedding=embedding_model,
-        persist_directory=persist_directory
-    )
-
-    return vector_store
-
-def query_rag(question, vector_store):
-    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=retriever,
-        return_source_documents=True
-    )
-    
-    result = qa_chain({"query": question})
-    return result["result"], result["source_documents"]
-
-if __name__ == '__main__':
-    pdf_path = 'data/sample_10k.pdf'
-    chunks = load_and_chunk_pdf(pdf_path)
-    vector_store = create_vector_store(chunks)
-    question = "What are the main risks associated with company's international supply chain?"
-    answer, sources = query_rag(question, vector_store)
-    print("Answer: ", answer)
-    print("Sources: ", [doc.page_content for doc in sources])
+        persist_directory=persist_directo
