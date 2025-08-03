@@ -1,22 +1,21 @@
-name: Build and Push Docker Image
+name: Docker Image CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
 
-    - name: Build the Docker image
-      run: docker build . -t ritub25/finance-rag:latest
-
-    - name: Push the Docker image
-      run: docker push ritub25/finance-rag:latest
+      - name: Build and push image
+        run: |
+          docker build -t ritub25/finance-rag-production-app:latest .
+          docker push ritub25/finance-rag-production-app:latest
